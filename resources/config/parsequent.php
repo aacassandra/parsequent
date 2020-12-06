@@ -23,27 +23,27 @@ return [
             "clientKey" => "",
             "restKey" => "",
             "masterKey" => "",
-            'protocol' => "",
-            'host' => "",
+            'protocol' => "https",
+            'host' => "parseapi.local.com",
             'database' => "",
-            'port' => "",
-            'headerAppID' => "",
-            'headerRestKey' => "",
-            'headerMasterKey' => "",
-            'headerClientKey' => "",
-            'headerSessionToken' => "",
-            'headerAccountKey' => "",
-            'headerRevocableSession' => "",
-            'headerClientVersion' => "",
-            'headerJobStatusId' => "",
-            'headerPushStatusId' => "",
+            'port' => 443,
+            'headerAppID' => 'X-Parse-Application-Id',
+            'headerRestKey' => 'X-Parse-REST-API-Key',
+            'headerMasterKey' => 'X-Parse-Master-Key',
+            'headerClientKey' => 'X-Parse-Client-Key',
+            'headerSessionToken' => 'X-Parse-Session-Token',
+            'headerAccountKey' => 'X-Parse-Account-Key',
+            'headerRevocableSession' => 'X-Parse-Revocable-Session',
+            'headerClientVersion' => 'X-Parse-Client-Version',
+            'headerJobStatusId' => 'X-Parse-Job-Status-Id',
+            'headerPushStatusId' => 'X-Parse-Push-Status-Id'
         ]
     ],
 
     /**
     * Configure the driver as default
     */
-    'local' => 'back4app',
+    'driver' => 'local',
 
     /**
     * You can use this parameter for session token validation

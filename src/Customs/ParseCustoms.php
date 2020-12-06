@@ -12,9 +12,9 @@ class ParseCustoms
     public static function Read($credentials, $className = '', $options = [])
     {
         if (isset($options['objectId']) && $options['objectId'] !== null && $options['objectId'] !== '') {
-            return ParseObjects::Read(config('database.connections.parse'), $className, $options['objectId'], $options);
+            return ParseObjects::Read($credentials, $className, $options['objectId'], $options);
         } else {
-            $queries = ParseQueries::Basic(config('database.connections.parse'), $className, $options);
+            $queries = ParseQueries::Basic($credentials, $className, $options);
             return $queries;
         }
     }
@@ -22,9 +22,9 @@ class ParseCustoms
     public static function Update($credentials, $className = '', $data = [], $options = [])
     {
         if (isset($options['objectId']) && $options['objectId'] !== null && $options['objectId'] !== '') {
-            return ParseObjects::Update(config('database.connections.parse'), $className, $options['objectId'], $data, $options);
+            return ParseObjects::Update($credentials, $className, $options['objectId'], $data, $options);
         } else {
-            $queries = ParseQueries::Basic(config('database.connections.parse'), $className, $options);
+            $queries = ParseQueries::Basic($credentials, $className, $options);
             if ($queries->status === true) {
                 $finalData = [];
                 $database = '';
@@ -40,7 +40,7 @@ class ParseCustoms
                     ]);
                 }
 
-                return ParseObjects::Batch(config('database.connections.parse'), $finalData, $options);
+                return ParseObjects::Batch($credentials, $finalData, $options);
             } else {
                 return $queries;
             }
@@ -50,9 +50,9 @@ class ParseCustoms
     public static function Delete($credentials, $className = '', $options = [])
     {
         if (isset($options['objectId']) && $options['objectId'] !== null && $options['objectId'] !== '') {
-            return ParseObjects::Delete(config('database.connections.parse'), $className, $options['objectId'], $options);
+            return ParseObjects::Delete($credentials, $className, $options['objectId'], $options);
         } else {
-            $queries = ParseQueries::Basic(config('database.connections.parse'), $className, $options);
+            $queries = ParseQueries::Basic($credentials, $className, $options);
             if ($queries->status === true) {
                 $finalData = [];
                 $database = '';
@@ -67,7 +67,7 @@ class ParseCustoms
                     ]);
                 }
 
-                return ParseObjects::Batch(config('database.connections.parse'), $finalData, $options);
+                return ParseObjects::Batch($credentials, $finalData, $options);
             } else {
                 return $queries;
             }

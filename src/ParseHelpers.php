@@ -285,4 +285,10 @@ class ParseHelpers
         }
         return $fixData;
     }
+
+    public static function Credentials()
+    {
+        $driver = config('parsequent.driver');
+        return config("parsequent.drivers.$driver");
+    }
 }

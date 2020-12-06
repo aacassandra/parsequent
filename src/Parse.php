@@ -6,6 +6,7 @@ use Parsequent\Customs\ParseCustoms;
 use Parsequent\Objects\ParseObjects;
 use Parsequent\Queries\ParseQueries;
 use Parsequent\Users\ParseUsers;
+use Parsequent\ParseHelpers;
 
 class Parse
 {
@@ -19,7 +20,7 @@ class Parse
      */
     public static function Create(string $className, array $data, array $options = [])
     {
-        return ParseObjects::Create(config('database.connections.parse'), $className, $data, $options);
+        return ParseObjects::Create(ParseHelpers::Credentials(), $className, $data, $options);
     }
 
     /**
@@ -31,7 +32,7 @@ class Parse
      */
     public static function Read(string $className, array $options = [])
     {
-        return ParseCustoms::Read(config('database.connections.parse'), $className, $options);
+        return ParseCustoms::Read(ParseHelpers::Credentials(), $className, $options);
     }
 
     /**
@@ -44,7 +45,7 @@ class Parse
      */
     public static function Update(string $className, array $data, array $options = [])
     {
-        return ParseCustoms::Update(config('database.connections.parse'), $className, $data, $options);
+        return ParseCustoms::Update(ParseHelpers::Credentials(), $className, $data, $options);
     }
 
     /**
@@ -56,7 +57,7 @@ class Parse
      */
     public static function Delete(string $className, array $options = [])
     {
-        return ParseCustoms::Delete(config('database.connections.parse'), $className, $options);
+        return ParseCustoms::Delete(ParseHelpers::Credentials(), $className, $options);
     }
 
     /**
@@ -68,7 +69,7 @@ class Parse
      */
     public static function Batch(array $data, array $options = [])
     {
-        return ParseObjects::Batch(config('database.connections.parse'), $data, $options);
+        return ParseObjects::Batch(ParseHelpers::Credentials(), $data, $options);
     }
 
     /**
@@ -80,7 +81,7 @@ class Parse
      */
     public static function CountingObjects(string $className, array $options = [])
     {
-        return ParseQueries::CountingObjects(config('database.connections.parse'), $className, $options);
+        return ParseQueries::CountingObjects(ParseHelpers::Credentials(), $className, $options);
     }
 
     /**
@@ -94,7 +95,7 @@ class Parse
      */
     public static function SignUp(string $username, string $password, array $data, array $options = [])
     {
-        return ParseUsers::SignUp(config('database.connections.parse'), $username, $password, $data, $options);
+        return ParseUsers::SignUp(ParseHelpers::Credentials(), $username, $password, $data, $options);
     }
 
     /**
@@ -107,7 +108,7 @@ class Parse
      */
     public static function SignIn(string $username, string $password, array $options = [])
     {
-        return ParseUsers::SignIn(config('database.connections.parse'), $username, $password, $options);
+        return ParseUsers::SignIn(ParseHelpers::Credentials(), $username, $password, $options);
     }
 
     /**
@@ -119,7 +120,7 @@ class Parse
      */
     public static function VerifyingEmails(string $email, array $options = [])
     {
-        return ParseUsers::VerifyingEmails(config('database.connections.parse'), $email, $options);
+        return ParseUsers::VerifyingEmails(ParseHelpers::Credentials(), $email, $options);
     }
 
     /**
@@ -131,7 +132,7 @@ class Parse
      */
     public static function PasswordReset(string $email, array $options = [])
     {
-        return ParseUsers::PasswordReset(config('database.connections.parse'), $email, $options);
+        return ParseUsers::PasswordReset(ParseHelpers::Credentials(), $email, $options);
     }
 
     /**
@@ -143,7 +144,7 @@ class Parse
      */
     public static function ValidatingSessionTokens(string $sessionToken, array $options = [])
     {
-        return ParseUsers::ValidatingSessionTokens(config('database.connections.parse'), $sessionToken, $options);
+        return ParseUsers::ValidatingSessionTokens(ParseHelpers::Credentials(), $sessionToken, $options);
     }
 
     /**
@@ -159,7 +160,7 @@ class Parse
         'sessionToken' => ''
     ])
     {
-        return ParseUsers::UpdateUser(config('database.connections.parse'), $objectId, $data, $options);
+        return ParseUsers::UpdateUser(ParseHelpers::Credentials(), $objectId, $data, $options);
     }
 
     public static function DeleteUser(string $objectId, array $options = [
@@ -167,6 +168,6 @@ class Parse
         'sessionToken' => ''
     ])
     {
-        return ParseUsers::DeleteUser(config('database.connections.parse'), $objectId, $options);
+        return ParseUsers::DeleteUser(ParseHelpers::Credentials(), $objectId, $options);
     }
 }
