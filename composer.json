@@ -1,0 +1,18 @@
+{
+  "name": "aacassandra/parsequent",
+  "description": "Save your time with Parsequent, for CRUD your laravel project using parse rest api",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "aacassandra",
+      "email": "alauddinafifcassandra@programmer.net"
+    }
+  ],
+  "minimum-stability": "dev",
+  "autoload": {
+    "psr-4": {
+      "Parsequent\\": "src/"
+    }
+  }
+}
