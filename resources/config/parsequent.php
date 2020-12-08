@@ -47,8 +47,12 @@ return [
     'driver' => 'local',
 
     /**
+    * If you enable this configuration, the session token validation check will be performed on every http request
+    *
+    * And
+    * 
     * You can use this parameter for session token validation
-    * we recommend using this in the middleware for the backend / front end
+    * we recommend using this in the middleware
     */
     'sessionValidation' => false
 ];
