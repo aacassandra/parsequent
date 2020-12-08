@@ -2,6 +2,7 @@
 
 namespace Parsequent\Users;
 
+use Illuminate\Support\Facades\Session;
 use Parsequent\ParseHelpers;
 use Parsequent\ParseTools;
 
@@ -22,11 +23,6 @@ class ParseUsers
 
         if (isset($options['masterKey']) && $options['masterKey'] === true) {
             array_push($headers, sprintf($credentials['headerMasterKey'] . ": %s", $credentials['masterKey']));
-        }
-
-        //Session Token Need Update
-        if (isset($options['sessionToken']) && $options['sessionToken'] === true) {
-            array_push($headers, sprintf($credentials['headerSessionToken'] . ": %s", session($credentials['storageKey'] . '.sessionToken')));
         }
 
         if ($database === '') {
@@ -84,7 +80,11 @@ class ParseUsers
         $httpCode = curl_getinfo($ch);
         curl_close($ch);
 
-        return ParseHelpers::responseHandler($httpCode, $output);
+        $res = ParseHelpers::responseHandler($httpCode, $output);
+        if ($res->status) {
+            session([$credentials['storageKey'] . '.user' => $res->output]);
+        }
+        return $res;
     }
 
     public static function VerifyingEmails($credentials, $email = '', $options = [])
@@ -101,11 +101,6 @@ class ParseUsers
 
         if (isset($options['masterKey']) && $options['masterKey'] === true) {
             array_push($headers, sprintf($credentials['headerMasterKey'] . ": %s", $credentials['masterKey']));
-        }
-
-        //Session Token Need Update
-        if (isset($options['sessionToken']) && $options['sessionToken'] === true) {
-            array_push($headers, sprintf($credentials['headerSessionToken'] . ": %s", session($credentials['storageKey'] . '.sessionToken')));
         }
 
         if ($database === '') {
@@ -142,11 +137,6 @@ class ParseUsers
 
         if (isset($options['masterKey']) && $options['masterKey'] === true) {
             array_push($headers, sprintf($credentials['headerMasterKey'] . ": %s", $credentials['masterKey']));
-        }
-
-        //Session Token Need Update
-        if (isset($options['sessionToken']) && $options['sessionToken'] === true) {
-            array_push($headers, sprintf($credentials['headerSessionToken'] . ": %s", session($credentials['storageKey'] . '.sessionToken')));
         }
 
         if ($database === '') {
@@ -205,8 +195,7 @@ class ParseUsers
     }
 
     public static function UpdateUser($credentials, $objectId = '', $data = [], $options = [
-        'masterKey' => false,
-        'sessionToken' => ''
+        'masterKey' => false
     ])
     {
         $protocol = $credentials['protocol'];
@@ -218,10 +207,11 @@ class ParseUsers
             sprintf($credentials['headerRestKey'] . ": %s", $credentials['restKey']),
             "Content-Type: application/json"
         );
+
         if (isset($options['masterKey']) && $options['masterKey'] === true) {
             array_push($headers, sprintf($credentials['headerMasterKey'] . ": %s", $credentials['masterKey']));
         } else {
-            array_push($headers, sprintf($credentials['headerSessionToken'] . ": %s", $options['sessionToken']));
+            array_push($headers, sprintf($credentials['headerSessionToken'] . ": %s", session($credentials['storageKey'] . '.user')->sessionToken ?? ''));
         }
 
         if ($database === '') {
@@ -246,8 +236,7 @@ class ParseUsers
     }
 
     public static function DeleteUser($credentials, $objectId = '', $options = [
-        'masterKey' => false,
-        'sessionToken' => ''
+        'masterKey' => false
     ])
     {
         $protocol = $credentials['protocol'];
@@ -262,7 +251,7 @@ class ParseUsers
         if (isset($options['masterKey']) && $options['masterKey'] === true) {
             array_push($headers, sprintf($credentials['headerMasterKey'] . ": %s", $credentials['masterKey']));
         } else {
-            array_push($headers, sprintf($credentials['headerSessionToken'] . ": %s", $options['sessionToken']));
+            array_push($headers, sprintf($credentials['headerSessionToken'] . ": %s", session($credentials['storageKey'] . '.user')->sessionToken ?? ''));
         }
 
         if ($database === '') {

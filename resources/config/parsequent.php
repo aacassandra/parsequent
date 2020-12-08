@@ -36,7 +36,8 @@ return [
             'headerRevocableSession' => 'X-Parse-Revocable-Session',
             'headerClientVersion' => 'X-Parse-Client-Version',
             'headerJobStatusId' => 'X-Parse-Job-Status-Id',
-            'headerPushStatusId' => 'X-Parse-Push-Status-Id'
+            'headerPushStatusId' => 'X-Parse-Push-Status-Id',
+            'storageKey' => 'session_parse'
         ]
     ],
 

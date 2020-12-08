@@ -5,11 +5,13 @@ namespace Parsequent;
 use Parsequent\Customs\ParseCustoms;
 use Parsequent\Objects\ParseObjects;
 use Parsequent\Queries\ParseQueries;
+use Parsequent\Roles\ParseRoles;
 use Parsequent\Users\ParseUsers;
 use Parsequent\ParseHelpers;
 
 class Parse
 {
+    // Parse Object
     /**
      * Create
      *
@@ -72,8 +74,9 @@ class Parse
         return ParseObjects::Batch(ParseHelpers::Credentials(), $data, $options);
     }
 
+    // Parse Queries
     /**
-     * CountingObjects
+     * Counting Objects
      *
      * @param  string $className
      * @param  array $options
@@ -84,6 +87,7 @@ class Parse
         return ParseQueries::CountingObjects(ParseHelpers::Credentials(), $className, $options);
     }
 
+    // Parse Users
     /**
      * SignUp
      *
@@ -156,18 +160,92 @@ class Parse
      * @return object
      */
     public static function UpdateUser(string $objectId, array $data, array $options = [
-        'masterKey' => false,
-        'sessionToken' => ''
+        'masterKey' => false
     ])
     {
         return ParseUsers::UpdateUser(ParseHelpers::Credentials(), $objectId, $data, $options);
     }
 
+    /**
+     * Delete User
+     *
+     * @param  string $objectId
+     * @param  array $options
+     * @return object
+     */
     public static function DeleteUser(string $objectId, array $options = [
-        'masterKey' => false,
-        'sessionToken' => ''
+        'masterKey' => false
     ])
     {
         return ParseUsers::DeleteUser(ParseHelpers::Credentials(), $objectId, $options);
+    }
+
+    // Parse Roles    
+    /**
+     * Create Role
+     *
+     * @param  string $roleName
+     * @param  array $options
+     * @return object
+     */
+    public static function CreateRole(string $roleName, array $options = [
+        'acl' => [],
+        'users' => [],
+        'roles' => [],
+        'data' => [],
+        'masterKey' => false
+    ])
+    {
+        return ParseRoles::Create(ParseHelpers::Credentials(), $roleName, $options);
+    }
+
+    /**
+     * Read Role
+     *
+     * @param  string $options['roleName]    All data will be displayed if the roleName is empty
+     * @return object
+     */
+    public static function ReadRole(array $options = [
+        'roleName' => '',
+        'masterKey' => false
+    ])
+    {
+        return ParseRoles::Read(ParseHelpers::Credentials(), $options);
+    }
+
+    /**
+     * Update Role
+     *
+     * @param  string $objectId
+     * @param  array $options
+     * @return object
+     */
+    public static function UpdateRole(string $objectId, array $options = [
+        'acl' => [],
+        'users' => [
+            'RemoveRelation' => [],
+            'AddRelation' => []
+        ],
+        'roles' => [
+            'RevmoeRelation' => [],
+            'AddRelation' => []
+        ],
+        'data' => [],
+        'masterKey' => false
+    ])
+    {
+        return ParseRoles::Update(ParseHelpers::Credentials(), $objectId, $options);
+    }
+
+    /**
+     * Delete Role
+     *
+     * @param  string $objectId
+     * @param  array $options
+     * @return object
+     */
+    public static function DeleteRole(string $objectId, $options = [])
+    {
+        return ParseRoles::Delete(ParseHelpers::Credentials(), $objectId, $options);
     }
 }

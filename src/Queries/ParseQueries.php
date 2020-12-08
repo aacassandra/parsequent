@@ -3,7 +3,7 @@
 namespace Parsequent\Queries;
 
 use Parsequent\ParseHelpers;
-use Parsequent\ParseTools;
+use Parsequent\Relations\ParseRelations;
 
 class ParseQueries
 {
@@ -20,6 +20,10 @@ class ParseQueries
 
         if (isset($options['masterKey']) && $options['masterKey'] === true) {
             array_push($headers, sprintf($credentials['headerMasterKey'] . ": %s", $credentials['masterKey']));
+        }
+
+        if (config('parsequent.sessionValidation') === true) {
+            array_push($headers, sprintf($credentials['headerSessionToken'] . ": %s", session($credentials['storageKey'] . '.user')->sessionToken ?? ''));
         }
 
         $queryIn = [];
@@ -68,7 +72,10 @@ class ParseQueries
             }
             $queryIn['where']['$or'] = $queryArr;
         }
-        $queryIn['where'] = json_encode($queryIn['where']);
+        if ((isset($options['where']) && count($options['where']) >= 1) || (isset($options['orWhere']) && count($options['orWhere']) >= 1)) {
+            $queryIn['where'] = json_encode($queryIn['where']);
+        }
+
         if ($database === '') {
             $url = sprintf("%s://%s:%s/classes/%s?%s", $protocol, $host, $port, $className, http_build_query($queryIn));
         } else {
@@ -86,47 +93,60 @@ class ParseQueries
         $httpCode = curl_getinfo($ch);
         curl_close($ch);
 
-        $response = ParseHelpers::responseHandler($httpCode, $output);
-        if ($response->status === true) {
-            if (count($response->output->results) === 0) {
-                $response->status = false;
+        $res = ParseHelpers::responseHandler($httpCode, $output);
+        if ($res->status === true) {
+            if (count($res->output->results) === 0) {
+                $res->status = false;
             } else {
-                $response->output = $response->output->results;
+                $res->output = $res->output->results;
             }
         }
 
-        if (isset($options['relation']) && $options['relation'] >= 1 && $response->status === true) {
-            $newResponse = [];
-            foreach ($response->output as $ii => $obj) {
-                $newObj = ParseTools::json2Array($obj);
-                // Example: $options['relation'] = ['users:_User','roles:_Role']
-                foreach ($options['relation'] as $relation) {
-                    $relationSplit = explode(":", $relation);
-                    if (count($relationSplit) == 2) {
-                        $relColumn = $relationSplit[0];
-                        $relClass = $relationSplit[1];
-                        $getRelation = ParseHelpers::getRestRelation($credentials, [
-                            'class' => $className,
-                            'objectId' => $obj->objectId,
-                            'relColumn' => $relColumn,
-                            'relClass' => $relClass
-                        ]);
-                        if ($getRelation->status) {
-                            foreach ($newObj as $key => $child) {
-                                if ($key == $relColumn) {
-                                    $newObj[$key] = $getRelation->output->results;
-                                }
+        if (isset($options['relation']) && $options['relation'] >= 1 && $res->status === true) {
+            foreach ($res->output as $ii => $obj) {
+                foreach ($options['relation'] as $rel) {
+                    $onClassName = '';
+                    $columnName = '';
+                    $relInclude = [];
+                    $relSplit = '';
+                    if (strpos($rel, '|') !== false) {
+                        $relSplit = explode('|', $rel);
+                        $columnName = $relSplit[0];
+                        $incSplitter = [];
+                        if (strpos($relSplit[1], ',')) {
+                            $incSplitter = explode('.', $relSplit[1]);
+                            foreach ($incSplitter as $inc) {
+                                array_push($relInclude, $inc);
                             }
+                        } else {
+                            array_push($relInclude, $relSplit[1]);
+                        }
+                    } else {
+                        $columnName = $rel;
+                    }
+
+                    foreach ($obj as $key => $value) {
+                        if ($columnName === $key) {
+                            $onClassName = $obj->$key->className;
                         }
                     }
-                }
 
-                $newObj = ParseTools::array2Json($newObj);
-                array_push($newResponse, $newObj);
+                    $relation = ParseRelations::ReadRelation($credentials, $className, $obj->objectId, [
+                        'name' => $columnName,
+                        'className' => $onClassName
+                    ], [
+                        'include' => $relInclude,
+                        'masterKey' => $options['masterKey'] ?? false
+                    ]);
+                    if ($relation->status) {
+                        $obj->$columnName = $relation->output;
+                    } else {
+                        $obj->$columnName = [];
+                    }
+                }
             }
-            $response->output = $newResponse;
         }
-        return $response;
+        return $res;
     }
 
     public static function CountingObjects($credentials, $className = '', $options = [])
@@ -142,6 +162,10 @@ class ParseQueries
 
         if (isset($options['masterKey']) && $options['masterKey'] === true) {
             array_push($headers, sprintf($credentials['headerMasterKey'] . ": %s", $credentials['masterKey']));
+        }
+
+        if (config('parsequent.sessionValidation') === true) {
+            array_push($headers, sprintf($credentials['headerSessionToken'] . ": %s", session($credentials['storageKey'] . '.user')->sessionToken ?? ''));
         }
 
         $queryIn = [];
