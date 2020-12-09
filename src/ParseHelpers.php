@@ -145,6 +145,81 @@ class ParseHelpers
         return $response;
     }
 
+    public static function getRestRelation($credentials = [], $parent = ["class" => '', "objectId" => '', "relColumn" => '', "relClass" => ''])
+    {
+        $protocol = $credentials['protocol'];
+        $host = $credentials['host'];
+        $port = $credentials['port'];
+        $database = $credentials['database'];
+        $headers = array(
+            sprintf($credentials['headerAppID'] . ": %s", $credentials['appId']),
+            sprintf($credentials['headerRestKey'] . ": %s", $credentials['restKey']),
+            sprintf($credentials['headerMasterKey'] . ": %s", $credentials['masterKey'])
+        );
+
+        $queryIn = [];
+        $queryIn['limit'] = 10000;
+
+        $queryIn['where'] = '{"$relatedTo":{"object":{"__type":"Pointer","className":"_Role","objectId":"' . $parent['objectId'] . '"},"key":"' . $parent['relColumn'] . '"}}';
+
+
+        if ($database === '') {
+            $url = sprintf("%s://%s:%s/classes/%s?%s", $protocol, $host, $port, '_User', http_build_query($queryIn));
+        } else {
+            $url = sprintf("%s://%s:%s/" . $database . "/classes/%s?%s", $protocol, $host, $port, '_User', http_build_query($queryIn));
+        }
+
+
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 180);
+        $output = json_decode(curl_exec($ch));
+        $httpCode = curl_getinfo($ch);
+        curl_close($ch);
+
+        $response = null;
+        if ($httpCode['http_code'] == 200) {
+            if (isset($output->message)) {
+                $output = ParseHelpers::errorMessageHandler($output);
+                $response = [
+                    "output" => [
+                        "code" => $output->code,
+                        "message" => $output->message
+                    ],
+                    "status" => false
+                ];
+            } else {
+                if (isset($output->results)) {
+                    $response = [
+                        "output" => $output,
+                        "status" => true
+                    ];
+                } else {
+                    $response = [
+                        "output" => $output,
+                        "statusCode" => $httpCode,
+                        "status" => false
+                    ];
+                }
+            }
+        } else {
+            $output = ParseHelpers::errorMessageHandler($output);
+            $response = [
+                "output" => [
+                    "code" => $output->code,
+                    "message" => $output->message
+                ],
+                "statusCode" => $httpCode,
+                "status" => false
+            ];
+        }
+        $response = ParseTools::array2Json($response);
+        return $response;
+    }
+
     public static function objectSet($data)
     {
         $fixData = [];

@@ -248,4 +248,19 @@ class Parse
     {
         return ParseRoles::Delete(ParseHelpers::Credentials(), $objectId, $options);
     }
+
+    /**
+     * Role Has Permission
+     *
+     * @param  string $objectId
+     * @param  array $options
+     * @return object
+     */
+    public static function RoleHasPermission(string $objectId, array $options = [
+        'permissions' => [],
+        'masterKey' => false
+    ])
+    {
+        return ParseRoles::RoleHasPermission(ParseHelpers::Credentials(), $objectId, $options);
+    }
 }

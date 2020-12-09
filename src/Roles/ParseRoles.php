@@ -4,6 +4,7 @@ namespace Parsequent\Roles;
 
 use Parsequent\ParseHelpers;
 use Parsequent\Customs\ParseCustoms;
+use Parsequent\Schema\ParseSchema;
 use Parsequent\Relations\ParseRelations;
 
 class ParseRoles
@@ -233,6 +234,167 @@ class ParseRoles
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+
+        $output = json_decode(curl_exec($ch));
+        $httpCode = curl_getinfo($ch);
+        curl_close($ch);
+
+        return ParseHelpers::responseHandler($httpCode, $output);
+    }
+
+    public static function RoleHasPermission($credentials, $objectId = '', $options = [
+        'permissions' => [],
+        'masterKey' => false
+    ])
+    {
+        $data = isset($options['permissions']) && count($options['permissions']) >= 1 ? ['permissions' => $options['permissions']] : [];
+        $update = ParseRoles::Update($credentials, $objectId, [
+            'data' => $data,
+            'masterKey' => $options['masterKey'] ?? false
+        ]);
+        if ($update->status && isset($options['permissions']) && count($options['permissions']) >= 1) {
+            $options['objectId'] = $objectId;
+            $role = ParseCustoms::Read($credentials, '_Role', $options);
+            if ($role->status) {
+                $roleName = $role->output->name;
+                $vDataPermission = [];
+                foreach ($options['permissions'] as $key => $pm) {
+                    $splitter = explode('-', $pm);
+                    $className = $splitter[0];
+                    $permission = $splitter[1];
+                    if (!isset($vDataPermission[$className])) {
+                        $vDataPermission[$className] = [];
+                        array_push($vDataPermission[$className], $permission);
+                    } else {
+                        array_push($vDataPermission[$className], $permission);
+                    }
+                }
+
+                foreach ($vDataPermission as $className => $permissions) {
+                    unset($options['objectId']);
+                    unset($options['permissions']);
+                    $sync = ParseRoles::RoleSyncPermission($credentials, $roleName, $className, $permissions, $options);
+                    if (!$sync->status) {
+                        return $sync;
+                    }
+                }
+            }
+        }
+        return $update;
+    }
+
+    public static function RoleSyncPermission($credentials, $roleName, $className, $permissions, $options)
+    {
+        $protocol = $credentials['protocol'];
+        $host = $credentials['host'];
+        $port = $credentials['port'];
+        $database = $credentials['database'];
+        $headers = array(
+            sprintf($credentials['headerAppID'] . ": %s", $credentials['appId']),
+            sprintf($credentials['headerRestKey'] . ": %s", $credentials['restKey']),
+            "Content-Type: application/json"
+        );
+        // {
+        //     classLevelPermissions:
+        //     {
+        //       "find": {
+        //         "requiresAuthentication": true,
+        //         "role:admin": true
+        //       },
+        //       "get": {
+        //         "requiresAuthentication": true,
+        //         "role:admin": true
+        //       },
+        //       "create": { "role:admin": true },
+        //       "update": { "role:admin": true },
+        //       "delete": { "role:admin": true }
+        //     }
+        //   }
+        if (isset($options['masterKey']) && $options['masterKey'] === true) {
+            array_push($headers, sprintf($credentials['headerMasterKey'] . ": %s", $credentials['masterKey']));
+        }
+
+        $schemas = ParseSchema::Read($credentials, $options);
+        if (!$schemas->status) {
+            return $schemas;
+        }
+        $schemas = $schemas->output;
+        foreach ($schemas as $schema) {
+            if ($schema->className === $className) {
+                $data = [
+                    'classLevelPermissions' => $schema->classLevelPermissions
+                ];
+                $availablePermissions = [
+                    'read' => false,
+                    'find' => false,
+                    'get' => false,
+                    'count' => false,
+                    'create' => false,
+                    'update' => false,
+                    'delete' => false,
+                    'addField' => false
+                ];
+                $classLevelPermissions = json_encode($data['classLevelPermissions']);
+                $classLevelPermissions = json_decode($classLevelPermissions, true);
+                $vRoleName = "role:$roleName";
+                foreach ($permissions as $permission) {
+                    if (lcfirst($permission) === 'read') {
+                        $availablePermissions['find'] = true;
+                        $availablePermissions['get'] = true;
+                        $availablePermissions['count'] = true;
+                        $classLevelPermissions['find'][$vRoleName] = true;
+                        $classLevelPermissions['get'][$vRoleName] = true;
+                        $classLevelPermissions['count'][$vRoleName] = true;
+                    } else {
+                        $availablePermissions[lcfirst($permission)] = true;
+                        $classLevelPermissions[lcfirst($permission)][$vRoleName] = true;
+                    }
+                }
+
+
+                foreach ($availablePermissions as $key => $del) {
+                    if ($del === false) {
+                        unset($classLevelPermissions[$key][$vRoleName]);
+                    }
+                }
+            }
+        }
+
+        $data = [
+            'classLevelPermissions' => []
+        ];
+
+        foreach ($permissions as $key => $permission) {
+            if (strtolower($permission) === 'read') {
+                $data['classLevelPermissions']['find'] = [
+                    "role:$roleName" => true
+                ];
+                $data['classLevelPermissions']['get'] = [
+                    "role:$roleName" => true
+                ];
+                $data['classLevelPermissions']['count'] = [
+                    "role:$roleName" => true
+                ];
+            } else {
+                $data['classLevelPermissions'][strtolower($permission)] = [
+                    "role:$roleName" => true
+                ];
+            }
+        }
+
+        if ($database === '') {
+            $url = sprintf("%s://%s:%s/schemas/%s", $protocol, $host, $port, $className);
+        } else {
+            $url = sprintf("%s://%s:%s/" . $database . "/schemas/%s", $protocol, $host, $port, $className);
+        }
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
         curl_setopt($ch, CURLOPT_TIMEOUT, 10);
 
         $output = json_decode(curl_exec($ch));
