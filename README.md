@@ -229,6 +229,96 @@ class DevController extends Controller
 }
 ```
 
+Because to update multiple rows at once we use 'Batch', as explained on the official page. The response from batch will be a list with the same number of elements as the input list. Each item in the list with be a dictionary with either the success or error field set. The value of success will be the normal response to the equivalent REST command:
+
+```
+{
+  "output": [
+    [
+      "succes": [
+        "updatedAt": "2020-12-10T08:04:47.256Z"
+      ]
+    ],
+    ...
+  ],
+  "code": 200,
+  "status": true
+}
+```
+
+#### 4. Delete
+
+To delete an object from Parse Cloud, you can use the Parse::Delete method. Same as the update object method. You can delete a single object or multiple objects at once. To delete a single object, look at the example below:
+
+```
+<?php
+namespace App\Http\Controllers;
+use Parsequent\Parse;
+class DevController extends Controller
+{
+  public function dev(Request $request)
+  {
+    $delete = Parse::Delete('GameScore', [
+      'objectId' => 'Ed1nuqPvcm'
+    ]);
+    if($delete->status){
+      // handling success
+    }else{
+      // handling error
+    }
+  }
+}
+```
+
+The response body is a JSON object containing all the user-provided fields, plus the createdAt, updatedAt, and objectId fields:
+
+```
+{
+  "output": {},
+  "code": 200,
+  "status": true
+}
+```
+
+Whereas to delete multiple objects at once, you can do it like this:
+
+```
+<?php
+namespace App\Http\Controllers;
+use Parsequent\Parse;
+class DevController extends Controller
+{
+  public function dev(Request $request)
+  {
+    $delete = Parse::Delete('GameScore', [
+        'where' => [
+          ['cheatMode', 'equalTo', true]
+        ]
+    ]);
+    if($delete->status){
+      // handling success
+    }else{
+      // handling error
+    }
+  }
+}
+```
+
+And then the response will be like this
+
+```
+{
+  "output": [
+    [
+      "succes": {}
+    ],
+    ...
+  ],
+  "code": 200,
+  "status": true
+}
+```
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.md](https://github.com/aacassandra/laraquent/blob/master/LICENSE) file for details
