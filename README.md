@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/29236058/101732025-2064be00-3aef-11eb-9f23-798f3757bc9b.png">
+</p>
+
 # Parse Eloquent
 
 This is a package for laravel framework especially for CRUD activities. This package uses the eloquent laravel style and doesn't leave the default eloquent style. It's just that this package makes it easier for us to perform CRUD activities without including the model dependency on the associated controller.
