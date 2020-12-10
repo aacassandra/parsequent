@@ -10,12 +10,15 @@ This is a package for laravel framework especially for CRUD activities. This pac
 - Delete
 - Batch
 - CountingObjects
-- SignUp
 - SignIn
+- SignOut
 - VerifyingEmails
 - PasswordReset
 - ValidatingSessionTokens
+- CreateUser
+  - With Role [Optional]
 - UpdateUser
+  - With Role [Optional]
 - DeleteUser
 - CreateRole
 - ReadRole

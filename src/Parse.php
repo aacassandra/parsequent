@@ -20,7 +20,9 @@ class Parse
      * @param  array $options
      * @return object
      */
-    public static function Create(string $className, array $data, array $options = [])
+    public static function Create(string $className, array $data, array $options = [
+        'masterKey' => false
+    ])
     {
         return ParseObjects::Create(ParseHelpers::Credentials(), $className, $data, $options);
     }
@@ -32,7 +34,18 @@ class Parse
      * @param  array $options
      * @return object
      */
-    public static function Read(string $className, array $options = [])
+    public static function Read(string $className, array $options = [
+        'objectId' => '',
+        'where' => [],
+        'orWhere' => [],
+        'limit' => 10000,
+        'skip' => 400,
+        'order' => '',
+        'keys' => '',
+        'include' => [],
+        'relation' => [],
+        'masterKey' => false
+    ])
     {
         return ParseCustoms::Read(ParseHelpers::Credentials(), $className, $options);
     }
@@ -45,7 +58,11 @@ class Parse
      * @param  array $options
      * @return object
      */
-    public static function Update(string $className, array $data, array $options = [])
+    public static function Update(string $className, array $data, array $options = [
+        'objectId' => '',
+        'where' => [],
+        'masterKey' => false
+    ])
     {
         return ParseCustoms::Update(ParseHelpers::Credentials(), $className, $data, $options);
     }
@@ -57,7 +74,11 @@ class Parse
      * @param  array $options
      * @return object
      */
-    public static function Delete(string $className, array $options = [])
+    public static function Delete(string $className, array $options = [
+        'objectId' => '',
+        'where' => [],
+        'masterKey' => false
+    ])
     {
         return ParseCustoms::Delete(ParseHelpers::Credentials(), $className, $options);
     }
@@ -69,7 +90,9 @@ class Parse
      * @param  array $options
      * @return object
      */
-    public static function Batch(array $data, array $options = [])
+    public static function Batch(array $data, array $options = [
+        'masterKey' => false
+    ])
     {
         return ParseObjects::Batch(ParseHelpers::Credentials(), $data, $options);
     }
@@ -82,37 +105,38 @@ class Parse
      * @param  array $options
      * @return object
      */
-    public static function CountingObjects(string $className, array $options = [])
+    public static function CountingObjects(string $className, array $options = [
+        'where' => [],
+        'masterKey' => false
+    ])
     {
         return ParseQueries::CountingObjects(ParseHelpers::Credentials(), $className, $options);
     }
 
     // Parse Users
     /**
-     * SignUp
+     * Sign In
      *
      * @param  string $username
      * @param  string $password
-     * @param  array $data
      * @param  array $options
      * @return object
      */
-    public static function SignUp(string $username, string $password, array $data, array $options = [])
+    public static function SignIn(string $username, string $password, array $options = [
+        'masterKey' => false
+    ])
     {
-        return ParseUsers::SignUp(ParseHelpers::Credentials(), $username, $password, $data, $options);
+        return ParseUsers::SignIn(ParseHelpers::Credentials(), $username, $password, $options);
     }
 
     /**
-     * SignIn
+     * Sign Out
      *
-     * @param  string $username
-     * @param  string $password
-     * @param  array $options
      * @return object
      */
-    public static function SignIn(string $username, string $password, array $options = [])
+    public static function SignOut()
     {
-        return ParseUsers::SignIn(ParseHelpers::Credentials(), $username, $password, $options);
+        return ParseUsers::SignOut(ParseHelpers::Credentials());
     }
 
     /**
@@ -122,7 +146,9 @@ class Parse
      * @param  array $options
      * @return object
      */
-    public static function VerifyingEmails(string $email, array $options = [])
+    public static function VerifyingEmails(string $email, array $options = [
+        'masterKey' => false
+    ])
     {
         return ParseUsers::VerifyingEmails(ParseHelpers::Credentials(), $email, $options);
     }
@@ -134,7 +160,9 @@ class Parse
      * @param  array $options
      * @return object
      */
-    public static function PasswordReset(string $email, array $options = [])
+    public static function PasswordReset(string $email, array $options = [
+        'masterKey' => false
+    ])
     {
         return ParseUsers::PasswordReset(ParseHelpers::Credentials(), $email, $options);
     }
@@ -146,9 +174,28 @@ class Parse
      * @param  array $options
      * @return object
      */
-    public static function ValidatingSessionTokens(string $sessionToken, array $options = [])
+    public static function ValidatingSessionTokens(string $sessionToken, array $options = [
+        'masterKey' => false
+    ])
     {
         return ParseUsers::ValidatingSessionTokens(ParseHelpers::Credentials(), $sessionToken, $options);
+    }
+
+    /**
+     * Create User
+     *
+     * @param  string $username
+     * @param  string $password
+     * @param  array $options
+     * @return object
+     */
+    public static function CreateUser(string $username, string $password, array $options = [
+        'role' => '',
+        'data' => [],
+        'masterKey' => false
+    ])
+    {
+        return ParseUsers::CreateUser(ParseHelpers::Credentials(), $username, $password, $options);
     }
 
     /**
@@ -159,11 +206,13 @@ class Parse
      * @param  array $options
      * @return object
      */
-    public static function UpdateUser(string $objectId, array $data, array $options = [
+    public static function UpdateUser(string $objectId, array $options = [
+        'role' => '',
+        'data' => [],
         'masterKey' => false
     ])
     {
-        return ParseUsers::UpdateUser(ParseHelpers::Credentials(), $objectId, $data, $options);
+        return ParseUsers::UpdateUser(ParseHelpers::Credentials(), $objectId, $options);
     }
 
     /**
@@ -193,6 +242,7 @@ class Parse
         'users' => [],
         'roles' => [],
         'data' => [],
+        'permissions' => [],
         'masterKey' => false
     ])
     {
@@ -227,7 +277,7 @@ class Parse
             'AddRelation' => []
         ],
         'roles' => [
-            'RevmoeRelation' => [],
+            'RemoveRelation' => [],
             'AddRelation' => []
         ],
         'data' => [],
@@ -244,7 +294,9 @@ class Parse
      * @param  array $options
      * @return object
      */
-    public static function DeleteRole(string $objectId, $options = [])
+    public static function DeleteRole(string $objectId, array $options = [
+        'masterKey' => false
+    ])
     {
         return ParseRoles::Delete(ParseHelpers::Credentials(), $objectId, $options);
     }
@@ -256,11 +308,10 @@ class Parse
      * @param  array $options
      * @return object
      */
-    public static function RoleHasPermission(string $objectId, array $options = [
-        'permissions' => [],
+    public static function RoleHasPermission(string $objectId, array $permissions = [], array $options = [
         'masterKey' => false
     ])
     {
-        return ParseRoles::RoleHasPermission(ParseHelpers::Credentials(), $objectId, $options);
+        return ParseRoles::RoleHasPermission(ParseHelpers::Credentials(), $objectId, $permissions, $options);
     }
 }

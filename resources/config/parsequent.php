@@ -54,5 +54,16 @@ return [
     * You can use this parameter for session token validation
     * we recommend using this in the middleware
     */
-    'sessionValidation' => false
+    'sessionValidation' => false,
+
+    /**
+     * The Permission Delimiter is used for the permission string as shown below 
+     * "Tags-Create" 
+     * "className[delimiter]permission"
+     * 
+     * Available permission:
+     * ['get', 'find', 'count', 'create', 'update', 'delete', 'addField']
+     * 
+     */
+    'permissionDelimiter' => '-'
 ];
