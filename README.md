@@ -70,6 +70,165 @@ php artisan vendor:publish --provider="Parsequent\ParseProvider"
 
 7. Now the Parse Class will be auto-loaded by Laravel.
 
+## Object Format
+
+| No  | Method | Parameters                                        | Options                                                                                                                                                                                                     |
+| --- | ------ | ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Create | className [string], data [array], options [array] | masterKey [bool]                                                                                                                                                                                            |
+| 2   | Read   | className ['string], options [array]              | objectId [string] <br/> where [array] <br/> orWhere [array] <br/> limit [int] <br/> skip [int] <br/> order [string] <br/> keys [array] <br/> include [array] <br/> relation [string] <br/> masterKey [bool] |
+| 3   | Update | className [string], data [array], options [array] | objectId [string] <br/> where [array] <br/> orWhere [array] <br/> masterKey [bool]                                                                                                                          |
+| 4   | Delete | className [string] , options [array]              | objectId [string] <br/> where [array] <br/> orWhere [array] <br/> masterKey [bool]                                                                                                                          |
+
+### Example
+
+#### 1. Create
+
+To create a new object in Parse. You can follow an example as described below:
+
+```
+<?php
+namespace App\Http\Controllers;
+use Parsequent\Parse;
+class DevController extends Controller
+{
+  public function dev(Request $request)
+  {
+    $create = Parse::Create('GameScore', [
+      'score' => 1337,
+      'playerName' => 'Sean Plott',
+      'cheatMode' => false
+    ]);
+    if($create->status){
+      // handling success
+    }else{
+      // handling error
+    }
+  }
+}
+```
+
+The response body is a JSON object containing the objectId and the createdAt timestamp of the newly-created object:
+
+```
+{
+  "output": {
+    "createdAt": "2011-08-20T02:06:57.931Z",
+    "objectId": "Ed1nuqPvcm"
+  },
+  "code": 201,
+  "status": true
+}
+```
+
+#### 2. Read
+
+After you create an object, you can retrieve its content by calling a method. For example, to retrieve the object we created above:
+
+```
+<?php
+namespace App\Http\Controllers;
+use Parsequent\Parse;
+class DevController extends Controller
+{
+  public function dev(Request $request)
+  {
+    $read = Parse::Read('GameScore', [
+      'objectId' => 'Ed1nuqPvcm'
+    ]);
+    if($read->status){
+      // handling success
+    }else{
+      // handling error
+    }
+  }
+}
+```
+
+The response body is a JSON object containing all the user-provided fields, plus the createdAt, updatedAt, and objectId fields:
+
+```
+{
+  "output": {
+    "score": 1337,
+    "playerName": "Sean Plott",
+    "cheatMode": false,
+    "skills": [
+      "pwnage",
+      "flying"
+    ],
+    "createdAt": "2011-08-20T02:06:57.931Z",
+    "updatedAt": "2011-08-20T02:06:57.931Z",
+    "objectId": "Ed1nuqPvcm"
+  },
+  "code": 200,
+  "status": true
+}
+```
+
+#### 3. Update
+
+To change the data on an object that already exists, calling method Parse::Update. Any keys you don’t specify will remain unchanged, so you can update just a subset of the object’s data. For example, if we wanted to change the score field on a specific object:
+
+```
+<?php
+namespace App\Http\Controllers;
+use Parsequent\Parse;
+class DevController extends Controller
+{
+  public function dev(Request $request)
+  {
+    $update = Parse::Update('GameScore', [
+        'score' => 73453
+    ], [
+        'objectId' => 'Ed1nuqPvcm'
+    ]);
+    if($update->status){
+      // handling success
+    }else{
+      // handling error
+    }
+  }
+}
+```
+
+The response body is a JSON object containing just an updatedAt field with the timestamp of the update.
+
+```
+{
+  "output": {
+    "updatedAt": "2011-08-21T18:02:52.248Z"
+  },
+  "code": 200,
+  "status": true
+}
+```
+
+If you want to change multiple lines with conditionals, add a where / orwhere parameter in the options. here we will run 'Batch', to update multiple rows at once.
+
+```
+<?php
+namespace App\Http\Controllers;
+use Parsequent\Parse;
+class DevController extends Controller
+{
+  public function dev(Request $request)
+  {
+    $update = Parse::Update('GameScore', [
+        'score' => 73453
+    ], [
+        'where' => [
+          ['cheatMode', 'equalTo', false]
+        ]
+    ]);
+    if($update->status){
+      // handling success
+    }else{
+      // handling error
+    }
+  }
+}
+```
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.md](https://github.com/aacassandra/laraquent/blob/master/LICENSE) file for details

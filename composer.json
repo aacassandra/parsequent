@@ -1,6 +1,7 @@
 {
   "name": "aacassandra/parsequent",
   "description": "Save your time with Parsequent, for CRUD your laravel project using parse rest api",
+  "keywords": ["laravel", "parse", "laravel parse", "parse laravel", "sdk", "parse-sdk", "eloquent"],
   "type": "library",
   "license": "MIT",
   "authors": [
