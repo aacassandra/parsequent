@@ -21,6 +21,7 @@ This is a package for laravel framework especially for CRUD activities. This pac
 - ValidatingSessionTokens
 - CreateUser
   - With Role [Optional]
+- ReadUser
 - UpdateUser
   - With Role [Optional]
 - DeleteUser

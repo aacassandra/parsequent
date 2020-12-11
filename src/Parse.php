@@ -199,6 +199,18 @@ class Parse
     }
 
     /**
+     * Read User
+     *
+     * @param  string $objectId
+     * @param  array $options
+     * @return object
+     */
+    public static function ReadUser(string $objectId, array $options = [])
+    {
+        return ParseUsers::ReadUser(ParseHelpers::Credentials(), $objectId, $options);
+    }
+
+    /**
      * Updating Users
      *
      * @param  string $objectId
