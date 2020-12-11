@@ -49,39 +49,40 @@ class ParseUsers
     }
 
     public static function SignOut($credentials)
-    { {
-            $protocol = $credentials['protocol'];
-            $host = $credentials['host'];
-            $port = $credentials['port'];
-            $database = $credentials['database'];
-            $headers = array(
-                sprintf($credentials['headerAppID'] . ": %s", $credentials['appId']),
-                sprintf($credentials['headerRestKey'] . ": %s", $credentials['restKey']),
-                sprintf($credentials['headerSessionToken'] . ": %s", session($credentials['storageKey'] . '.user')->sessionToken ?? '')
-            );
+    {
+        $protocol = $credentials['protocol'];
+        $host = $credentials['host'];
+        $port = $credentials['port'];
+        $database = $credentials['database'];
+        $headers = array(
+            sprintf($credentials['headerAppID'] . ": %s", $credentials['appId']),
+            sprintf($credentials['headerRestKey'] . ": %s", $credentials['restKey']),
+            sprintf($credentials['headerSessionToken'] . ": %s", session($credentials['storageKey'] . '.user')->sessionToken ?? '')
+        );
 
-            if ($database === '') {
-                $url = sprintf("%s://%s:%s/logout", $protocol, $host, $port);
-            } else {
-                $url = sprintf("%s://%s:%s/" . $database . "/logout", $protocol, $host, $port);
-            }
-
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, '');
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 10);
-
-            $output = json_decode(curl_exec($ch));
-            $httpCode = curl_getinfo($ch);
-            curl_close($ch);
-
-            $res = ParseHelpers::responseHandler($httpCode, $output);
-            if ($res->status) {
-                session()->forget($credentials['storageKey'] . ".user");
-            }
+        if ($database === '') {
+            $url = sprintf("%s://%s:%s/logout", $protocol, $host, $port);
+        } else {
+            $url = sprintf("%s://%s:%s/" . $database . "/logout", $protocol, $host, $port);
         }
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, '');
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+
+        $output = json_decode(curl_exec($ch));
+        $httpCode = curl_getinfo($ch);
+        curl_close($ch);
+
+        $res = ParseHelpers::responseHandler($httpCode, $output);
+        if ($res->status) {
+            session()->forget($credentials['storageKey'] . ".user");
+        }
+
+        return $res;
     }
 
     public static function VerifyingEmails($credentials, $email = '', $options = [])
