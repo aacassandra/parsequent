@@ -189,7 +189,19 @@ class ParseUsers
         $httpCode = curl_getinfo($ch);
         curl_close($ch);
 
-        return ParseHelpers::responseHandler($httpCode, $output);
+        $res = ParseHelpers::responseHandler($httpCode, $output);
+        if ($res->status) {
+            if (
+                (isset($options['include']) && count($options['include']) >= 1) ||
+                (isset($options['relation']) && count($options['relation']) >= 1)
+            ) {
+                $user = ParseUsers::ReadUser($credentials, $res->output->objectId, $options);
+                if ($user->status) {
+                    $res->output = $user->output;
+                }
+            }
+        }
+        return $res;
     }
 
     public static function CreateUser($credentials, $username, $password, $options = [

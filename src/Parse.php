@@ -175,6 +175,8 @@ class Parse
      * @return object
      */
     public static function ValidatingSessionTokens(string $sessionToken, array $options = [
+        'include' => [],
+        'relation' => [],
         'masterKey' => false
     ])
     {
