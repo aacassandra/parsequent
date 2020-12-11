@@ -28,25 +28,25 @@ class ParseQueries
 
         $queryIn = [];
 
-        if (isset($options['limit']) && is_int($options['limit'])) {
+        if (isset($options['limit']) && is_int($options['limit']) && $options['limit'] !== 0) {
             $queryIn['limit'] = $options['limit'];
         } else {
             $queryIn['limit'] = 10000;
         }
 
-        if (isset($options['skip']) && is_int($options['skip'])) {
+        if (isset($options['skip']) && is_int($options['skip']) && $options['skip'] !== 0) {
             $queryIn['skip'] = $options['skip'];
         }
 
-        if (isset($options['order']) && is_string($options['order'])) {
+        if (isset($options['order']) && is_string($options['order']) && $options['order'] !== '') {
             $queryIn['order'] = $options['order'];
         }
 
-        if (isset($options['keys']) && is_string($options['keys'])) {
+        if (isset($options['keys']) && is_string($options['keys']) && $options['keys'] !== '') {
             $queryIn['keys'] = $options['keys'];
         }
 
-        if (isset($options['excludeKeys']) && is_string($options['excludeKeys'])) {
+        if (isset($options['excludeKeys']) && is_string($options['excludeKeys']) && $options['excludeKeys'] !== '') {
             $queryIn['excludeKeys'] = $options['excludeKeys'];
         }
 
