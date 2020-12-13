@@ -270,7 +270,7 @@ class Parse
      * @return object
      */
     public static function ReadRole(array $options = [
-        'roleName' => '',
+        'objectId' => '',
         'masterKey' => false
     ])
     {

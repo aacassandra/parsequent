@@ -143,12 +143,6 @@ class ParseRoles
 
     public static function Read($credentials, $options = [])
     {
-        if (isset($options['roleName']) && $options['roleName'] !== '') {
-            $options['where'] = [
-                ['name', 'equalTo', $options['roleName']]
-            ];
-        }
-
         return ParseCustoms::Read($credentials, '_Role', $options);
     }
 
