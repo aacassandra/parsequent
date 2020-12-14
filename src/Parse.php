@@ -2,6 +2,7 @@
 
 namespace Parsequent;
 
+use Illuminate\Support\Arr;
 use Parsequent\Customs\ParseCustoms;
 use Parsequent\Objects\ParseObjects;
 use Parsequent\Queries\ParseQueries;
@@ -24,6 +25,7 @@ class Parse
         'masterKey' => false
     ])
     {
+        $options = Arr::only($options, ['masterKey']);
         return ParseObjects::Create(ParseHelpers::Credentials(), $className, $data, $options);
     }
 
@@ -47,6 +49,7 @@ class Parse
         'masterKey' => false
     ])
     {
+        $options = Arr::only($options, ['objectId', 'where', 'orWhere', 'limit', 'skip', 'order', 'keys', 'include', 'relation', 'masterKey']);
         return ParseCustoms::Read(ParseHelpers::Credentials(), $className, $options);
     }
 
@@ -64,6 +67,7 @@ class Parse
         'masterKey' => false
     ])
     {
+        $options = Arr::only($options, ['objectId', 'where', 'masterKey']);
         return ParseCustoms::Update(ParseHelpers::Credentials(), $className, $data, $options);
     }
 
@@ -80,6 +84,7 @@ class Parse
         'masterKey' => false
     ])
     {
+        $options = Arr::only($options, ['objectId', 'where', 'masterKey']);
         return ParseCustoms::Delete(ParseHelpers::Credentials(), $className, $options);
     }
 
@@ -94,6 +99,7 @@ class Parse
         'masterKey' => false
     ])
     {
+        $options = Arr::only($options, ['masterKey']);
         return ParseObjects::Batch(ParseHelpers::Credentials(), $data, $options);
     }
 
@@ -110,6 +116,7 @@ class Parse
         'masterKey' => false
     ])
     {
+        $options = Arr::only($options, ['where', 'masterKey']);
         return ParseQueries::CountingObjects(ParseHelpers::Credentials(), $className, $options);
     }
 
@@ -126,6 +133,7 @@ class Parse
         'masterKey' => false
     ])
     {
+        $options = Arr::only($options, ['masterKey']);
         return ParseUsers::SignIn(ParseHelpers::Credentials(), $username, $password, $options);
     }
 
@@ -150,6 +158,7 @@ class Parse
         'masterKey' => false
     ])
     {
+        $options = Arr::only($options, ['masterKey']);
         return ParseUsers::VerifyingEmails(ParseHelpers::Credentials(), $email, $options);
     }
 
@@ -164,6 +173,7 @@ class Parse
         'masterKey' => false
     ])
     {
+        $options = Arr::only($options, ['masterKey']);
         return ParseUsers::PasswordReset(ParseHelpers::Credentials(), $email, $options);
     }
 
@@ -180,6 +190,7 @@ class Parse
         'masterKey' => false
     ])
     {
+        $options = Arr::only($options, ['include', 'relation', 'masterKey']);
         return ParseUsers::ValidatingSessionTokens(ParseHelpers::Credentials(), $sessionToken, $options);
     }
 
@@ -197,19 +208,23 @@ class Parse
         'masterKey' => false
     ])
     {
+        $options = Arr::only($options, ['role', 'data', 'masterKey']);
         return ParseUsers::CreateUser(ParseHelpers::Credentials(), $username, $password, $options);
     }
 
     /**
      * Read User
      *
-     * @param  string $objectId
      * @param  array $options
      * @return object
      */
-    public static function ReadUser(string $objectId, array $options = [])
+    public static function ReadUser(array $options = [
+        'objectId' => '',
+        'masterKey' => false
+    ])
     {
-        return ParseUsers::ReadUser(ParseHelpers::Credentials(), $objectId, $options);
+        $options = Arr::only($options, ['objectId', 'masterKey']);
+        return ParseUsers::ReadUser(ParseHelpers::Credentials(), $options);
     }
 
     /**
@@ -226,6 +241,7 @@ class Parse
         'masterKey' => false
     ])
     {
+        $options = Arr::only($options, ['role', 'data', 'masterKey']);
         return ParseUsers::UpdateUser(ParseHelpers::Credentials(), $objectId, $options);
     }
 
@@ -240,6 +256,7 @@ class Parse
         'masterKey' => false
     ])
     {
+        $options = Arr::only($options, ['masterKey']);
         return ParseUsers::DeleteUser(ParseHelpers::Credentials(), $objectId, $options);
     }
 
@@ -260,6 +277,7 @@ class Parse
         'masterKey' => false
     ])
     {
+        $options = Arr::only($options, ['acl', 'users', 'roles', 'data', 'permissions', 'masterKey']);
         return ParseRoles::Create(ParseHelpers::Credentials(), $roleName, $options);
     }
 
@@ -274,6 +292,7 @@ class Parse
         'masterKey' => false
     ])
     {
+        $options = Arr::only($options, ['objectId', 'masterKey']);
         return ParseRoles::Read(ParseHelpers::Credentials(), $options);
     }
 
@@ -298,6 +317,7 @@ class Parse
         'masterKey' => false
     ])
     {
+        $options = Arr::only($options, ['acl', 'users', 'roles', 'data', 'masterKey']);
         return ParseRoles::Update(ParseHelpers::Credentials(), $objectId, $options);
     }
 
@@ -312,6 +332,7 @@ class Parse
         'masterKey' => false
     ])
     {
+        $options = Arr::only($options, ['masterKey']);
         return ParseRoles::Delete(ParseHelpers::Credentials(), $objectId, $options);
     }
 
@@ -326,6 +347,7 @@ class Parse
         'masterKey' => false
     ])
     {
+        $options = Arr::only($options, ['masterKey']);
         return ParseRoles::RoleHasPermission(ParseHelpers::Credentials(), $objectId, $permissions, $options);
     }
 }

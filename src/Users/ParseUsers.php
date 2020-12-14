@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Session;
 use Parsequent\ParseHelpers;
 use Parsequent\ParseTools;
 use Parsequent\Roles\ParseRoles;
+use Parsequent\Customs\ParseCustoms;
 
 class ParseUsers
 {
@@ -195,7 +196,8 @@ class ParseUsers
                 (isset($options['include']) && count($options['include']) >= 1) ||
                 (isset($options['relation']) && count($options['relation']) >= 1)
             ) {
-                $user = ParseUsers::ReadUser($credentials, $res->output->objectId, $options);
+                $options['objectId'] = $res->output->objectId;
+                $user = ParseUsers::ReadUser($credentials, $options);
                 if ($user->status) {
                     $res->output = $user->output;
                 }
@@ -261,96 +263,9 @@ class ParseUsers
         return $res;
     }
 
-    public static function ReadUser($credentials, $objectId, $options)
+    public static function ReadUser($credentials, $options)
     {
-        $protocol = $credentials['protocol'];
-        $host = $credentials['host'];
-        $port = $credentials['port'];
-        $database = $credentials['database'];
-        $headers = [
-            sprintf($credentials['headerAppID'] . ": %s", $credentials['appId']),
-            sprintf($credentials['headerRestKey'] . ": %s", $credentials['restKey']),
-        ];
-
-        if (isset($options['masterKey']) && $options['masterKey'] === true) {
-            array_push($headers, sprintf($credentials['headerMasterKey'] . ": %s", $credentials['masterKey']));
-        }
-
-        if (config('parsequent.sessionValidation') === true) {
-            array_push($headers, sprintf($credentials['headerSessionToken'] . ": %s", session($credentials['storageKey'] . '.user')->sessionToken ?? ''));
-        }
-
-        $queryIn = [];
-        if (isset($options['include']) && count($options['include']) >= 1) {
-            $queryIn['include'] = $options['include'];
-        }
-
-        if (count($queryIn) >= 1) {
-            if ($database === '') {
-                $url = sprintf("%s://%s:%s/users/%s?%s", $protocol, $host, $port, $objectId, http_build_query($queryIn));
-            } else {
-                $url = sprintf("%s://%s:%s/" . $database . "/users/%s?%s", $protocol, $host, $port, $objectId, http_build_query($queryIn));
-            }
-        } else {
-            if ($database === '') {
-                $url = sprintf("%s://%s:%s/users/%s", $protocol, $host, $port, $objectId);
-            } else {
-                $url = sprintf("%s://%s:%s/" . $database . "/users/%s", $protocol, $host, $port, $objectId);
-            }
-        }
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 150);
-
-        $output = json_decode(curl_exec($ch));
-        $httpCode = curl_getinfo($ch);
-        curl_close($ch);
-
-        $res = ParseHelpers::responseHandler($httpCode, $output);
-        if (isset($options['relation']) && $options['relation'] >= 1 && $res->status === true) {
-            foreach ($options['relation'] as $rel) {
-                $onClassName = '';
-                $columnName = '';
-                $relInclude = [];
-                $relSplit = '';
-                if (strpos($rel, '|') !== false) {
-                    $relSplit = explode('|', $rel);
-                    $columnName = $relSplit[0];
-                    $incSplitter = [];
-                    if (strpos($relSplit[1], ',')) {
-                        $incSplitter = explode('.', $relSplit[1]);
-                        foreach ($incSplitter as $inc) {
-                            array_push($relInclude, $inc);
-                        }
-                    } else {
-                        array_push($relInclude, $relSplit[1]);
-                    }
-                } else {
-                    $columnName = $rel;
-                }
-
-                foreach ($res->output as $key => $value) {
-                    if ($columnName === $key) {
-                        $onClassName = $res->output->$key->className;
-                    }
-                }
-
-                $relation = ParseRelations::ReadRelation($credentials, '_User', $objectId, [
-                    'name' => $columnName,
-                    'className' => $onClassName
-                ], [
-                    'include' => $relInclude,
-                    'masterKey' => $options['masterKey'] ?? false
-                ]);
-                if ($relation->status) {
-                    $res->output->$columnName = $relation->output;
-                }
-            }
-        }
-        return $res;
+        return ParseCustoms::Read($credentials, '_User', $options);
     }
 
     public static function UpdateUser($credentials, $objectId = '', $options = [
