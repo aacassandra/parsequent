@@ -275,7 +275,7 @@ class ParseUsers
     ])
     {
         $res = [];
-        if (isset($data)) {
+        if (isset($options['data'])) {
             $protocol = $credentials['protocol'];
             $host = $credentials['host'];
             $port = $credentials['port'];
@@ -309,8 +309,6 @@ class ParseUsers
             $output = json_decode(curl_exec($ch));
             $httpCode = curl_getinfo($ch);
             curl_close($ch);
-
-            return ParseHelpers::responseHandler($httpCode, $output);
 
             $res = ParseHelpers::responseHandler($httpCode, $output);
             if (!$res->status) {
