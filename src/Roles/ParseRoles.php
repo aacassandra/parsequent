@@ -410,8 +410,19 @@ class ParseRoles
                     return $schemas;
                 }
                 $schemas = $schemas->output;
-
                 if (count($vDataPermission) >= 1) {
+                    $newVDataPermission = [];
+                    foreach ($vDataPermission as $className => $actionPermissions) {
+                        if (strtolower($className) === 'role') :
+                            $newVDataPermission['_Role'] = $actionPermissions;
+                        elseif (strtolower($className) === 'user') :
+                            $newVDataPermission['_User'] = $actionPermissions;
+                        else :
+                            $newVDataPermission[$className] = $actionPermissions;
+                        endif;
+                    }
+                    $vDataPermission = $newVDataPermission;
+
                     foreach ($vDataPermission as $className => $actionPermissions) {
                         foreach ($schemas as $schema) {
                             if ($schema->className === $className) {
