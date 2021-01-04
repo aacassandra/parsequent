@@ -6,7 +6,9 @@ use Parsequent\ParseHelpers;
 
 class ParseSchema
 {
-    public static function Read($credentials, $options = [])
+    public static function Read($credentials, $options = [
+        'masterKey' => false
+    ])
     {
         $protocol = $credentials['protocol'];
         $host = $credentials['host'];

@@ -260,7 +260,7 @@ class Parse
         return ParseUsers::DeleteUser(ParseHelpers::Credentials(), $objectId, $options);
     }
 
-    // Parse Roles    
+    // Parse Roles
     /**
      * Create Role
      *
@@ -313,11 +313,12 @@ class Parse
             'RemoveRelation' => [],
             'AddRelation' => []
         ],
+        'permissions' => [],
         'data' => [],
         'masterKey' => false
     ])
     {
-        $options = Arr::only($options, ['acl', 'users', 'roles', 'data', 'masterKey']);
+        $options = Arr::only($options, ['acl', 'users', 'roles', 'permissions', 'data', 'masterKey']);
         return ParseRoles::Update(ParseHelpers::Credentials(), $objectId, $options);
     }
 

@@ -196,6 +196,10 @@ class ParseRoles
             }
         }
 
+        if (isset($options['permissions'])) {
+            $data['permissions'] = $options['permissions'];
+        }
+
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -308,6 +312,7 @@ class ParseRoles
                 }
 
                 if (isset($options['permissions'])) {
+                    $options['roleNeedUpdate'] = false;
                     $sync = ParseRoles::RoleHasPermission($credentials, $objectId, $options['permissions'], $options);
                     if (!$sync->status) {
                         return $sync;
@@ -361,31 +366,45 @@ class ParseRoles
     }
 
     public static function RoleHasPermission($credentials, $objectId = '', $permissions = [], $options = [
-        'masterKey' => false
+        'masterKey' => false,
+        'roleNeedUpdate' => true
     ])
     {
-        $data = isset($permissions) ? (count($permissions) >= 1 ? ['permissions' => $permissions] : ['permissions' => []]) : [];
-        $update = ParseRoles::Update($credentials, $objectId, [
-            'data' => $data,
+        $options = [
+            'roleNeedUpdate' => isset($options['roleNeedUpdate']) ? $options['roleNeedUpdate'] : true,
             'masterKey' => $options['masterKey'] ?? false
-        ]);
-        if ($update->status && isset($permissions) && count($permissions) >= 0) {
+        ];
+
+        if (isset($permissions) && count($permissions) >= 1) :
+            $options['permissions'] = $permissions;
+        else :
+            $options['permissions'] = [];
+        endif;
+
+        $run = function () use ($credentials, $objectId, $permissions, $options) {
             $options['objectId'] = $objectId;
+            unset($options['roleNeedUpdate']);
             $role = ParseCustoms::Read($credentials, '_Role', $options);
             if ($role->status) {
                 $roleName = $role->output->name;
                 $vDataPermission = [];
-                foreach ($permissions as $key => $pm) {
-                    $splitter = explode(config('parsequent.permissionDelimiter'), $pm);
-                    $className = $splitter[0];
-                    $permission = $splitter[1];
-                    if (!isset($vDataPermission[$className])) {
-                        $vDataPermission[$className] = [];
-                        array_push($vDataPermission[$className], $permission);
-                    } else {
-                        array_push($vDataPermission[$className], $permission);
+                $className = '';
+                if (count($permissions) > 0) :
+                    foreach ($permissions as $key => $pm) {
+                        $splitter = explode(config('parsequent.permissionDelimiter'), $pm);
+                        $className = $splitter[0];
+                        $permission = $splitter[1];
+                        if (!isset($vDataPermission[$className])) {
+                            $vDataPermission[$className] = [];
+                            array_push($vDataPermission[$className], $permission);
+                        } else {
+                            array_push($vDataPermission[$className], $permission);
+                        }
                     }
-                }
+                else :
+                    $className = '_Role';
+                endif;
+
                 $schemas = ParseSchema::Read($credentials, $options);
                 if (!$schemas->status) {
                     return $schemas;
@@ -407,16 +426,28 @@ class ParseRoles
                 }
 
                 foreach ($schemas as $schema) {
-                    if ($schema->className === 'Tags') {
-                        $sync = ParseRoles::RoleSyncPermission($credentials, $roleName, $vDataPermission, ParseTools::json2Array($schema), $options);
-                        if (!$sync->status) {
-                            return $sync;
-                        }
+                    $sync = ParseRoles::RoleSyncPermission($credentials, $roleName, $vDataPermission, ParseTools::json2Array($schema), $options);
+                    if (!$sync->status) {
+                        return $sync;
                     }
                 }
             }
-        }
-        return $update;
+        };
+
+        if ($options['roleNeedUpdate']) :
+            $update = ParseRoles::Update($credentials, $objectId, $options);
+            if ($update->status && isset($permissions) && count($permissions) >= 0) :
+                $run();
+                return $update;
+            else :
+                return $update;
+            endif;
+        else :
+            $run();
+            return ParseTools::array2Json([
+                'status' => true
+            ]);
+        endif;
     }
 
     public static function RoleClassPermission($credentials, $roleName, $className, $permissions, $defaultClassLevelPermissions, $options)
@@ -521,9 +552,9 @@ class ParseRoles
 
     public static function RoleSyncPermission($credentials, $roleName, $roleHasPermissions, $schema, $options)
     {
-        $res = json_decode('{
-            "status": true            
-        }');
+        $res = ParseTools::array2Json([
+            'status' => true
+        ]);
         $listPermission = ['get', 'find', 'count', 'create', 'update', 'delete', 'addField'];
         $CLP = $schema['classLevelPermissions'];
         $available = 0;
