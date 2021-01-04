@@ -520,12 +520,20 @@ class ParseRoles
                 lcfirst($permission) === 'find' ||
                 lcfirst($permission) === 'count' ||
                 lcfirst($permission) === 'create' ||
+                lcfirst($permission) === 'edit' ||
                 lcfirst($permission) === 'update' ||
                 lcfirst($permission) === 'delete' ||
                 lcfirst($permission) === 'addField'
             ) {
-                $availablePermissions[lcfirst($permission)] = true;
-                $classLevelPermissions[lcfirst($permission)][$vRoleName] = true;
+                $fixPm = '';
+                if (lcfirst($permission) === 'edit'):
+                    $fixPm = 'update';
+                else:
+                    $fixPm = lcfirst($permission);
+                endif;
+
+                $availablePermissions[$fixPm] = true;
+                $classLevelPermissions[$fixPm][$vRoleName] = true;
             }
         }
 
