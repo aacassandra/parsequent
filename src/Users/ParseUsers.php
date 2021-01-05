@@ -43,13 +43,22 @@ class ParseUsers
         curl_close($ch);
 
         $res = ParseHelpers::responseHandler($httpCode, $output);
-        $options['objectId'] = $res->output->objectId;
-        $options['include'] = ['role'];
-        $user = ParseUsers::ReadUser($credentials, $options);
-        if ($user->status) {
-            session([$credentials['storageKey'] . '.user' => $user->output]);
-        }
-        return $user;
+
+        if ($res->status) :
+            $options['objectId'] = $res->output->objectId;
+            $options['include'] = ['role'];
+            $options['masterKey'] = true;
+            $user = ParseUsers::ReadUser($credentials, $options);
+            if ($user->status) :
+                if (isset($res->output->role) && isset($user->output->role)) :
+                    $res->output->role = $user->output->role;
+                endif;
+                session([$credentials['storageKey'] . '.user' => $res->output]);
+            endif;
+            return $res;
+        else :
+            return $res;
+        endif;
     }
 
     public static function SignOut($credentials)
